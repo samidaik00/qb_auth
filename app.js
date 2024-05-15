@@ -48,24 +48,24 @@ app.get('/callback', async (req, res) => {
       .then(function (authResponse) {
         console.log('The Token is  ' + JSON.stringify(authResponse.json));
         // Store the tokens in the Supabase database
-        const myAsyncFunction = async () => {
-          const { data, error } = await supabase
-            .from('qb_auth')
-            .insert([
-              {
-                access_token: authResponse.getJson().access_token,
-                refresh_token: authResponse.getJson().refresh_token,
-              }
-            ]);
+        // const myAsyncFunction = async () => {
+        //   const { data, error } = await supabase
+        //     .from('qb_auth')
+        //     .insert([
+        //       {
+        //         access_token: authResponse.getJson().access_token,
+        //         refresh_token: authResponse.getJson().refresh_token,
+        //       }
+        //     ]);
 
-          if (error) {
-            throw error;
-          }
-        };
+        //   if (error) {
+        //     throw error;
+        //   }
+        // };
 
-        myAsyncFunction();
+        // myAsyncFunction();
 
-        console.log('Tokens stored successfully:', data);
+        // console.log('Tokens stored successfully:', data);
         res.send('Authentication successful and tokens stored.');
       })
       .catch(function (e) {
