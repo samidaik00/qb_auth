@@ -47,26 +47,28 @@ app.get('/callback', async (req, res) => {
       .createToken(parseRedirect)
       .then(function (authResponse) {
         console.log('The Token is  ' + JSON.stringify(authResponse.json));
-        // Store the tokens in the Supabase database
-        // const myAsyncFunction = async () => {
-        //   const { data, error } = await supabase
-        //     .from('qb_auth')
-        //     .insert([
-        //       {
-        //         access_token: authResponse.getJson().access_token,
-        //         refresh_token: authResponse.getJson().refresh_token,
-        //       }
-        //     ]);
 
-        //   if (error) {
-        //     throw error;
-        //   }
-        // };
+        // Insert the token into the database
+        supabase
+          .from('tokens')
+          .insert([
+            {
+              access_token: authResponse.json.access_token,
+              refresh_token: authResponse.json.refresh_token,
+              // realm_id: authResponse.json.realmId,
+              // x_refresh_token_expires_in: authResponse.json.x_refresh_token_expires_in,
+              // token_type: authResponse.json.token_type,
+              // expires_in: authResponse.json.expires_in,
+              // x_refresh_token_expires_at: authResponse.json.x_refresh_token_expires_at
+            }
+          ])
+          .then(() => {
+            console.log('Token inserted successfully');
+          })
+          .catch(err => {
+            console.error('Error inserting token:', err.message);
+          });
 
-        // myAsyncFunction();
-
-        // console.log('Tokens stored successfully:', data);
-        res.send('Authentication successful and tokens stored.');
       })
       .catch(function (e) {
         console.error('The error message is :' + e.originalMessage);
