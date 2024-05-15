@@ -50,7 +50,7 @@ app.get('/callback', async (req, res) => {
 
         // Insert the token into the database
         supabase
-          .from('tokens')
+          .from('qb_auth')
           .insert([
             {
               access_token: authResponse.json.access_token,
