@@ -43,15 +43,19 @@ app.get('/callback', async (req, res) => {
   try {
     // Attempt to create the token using the OAuth client
     const authResponse = await oauthClient.createToken(parseRedirect);
-    console.log('The Token is ' + JSON.stringify(authResponse.getJson()));
+    console.log('The Token details:', authResponse);
 
+    // Access token details directly if authResponse is an object with properties
+    const { access_token, refresh_token } = authResponse.token;
+
+  
     // Attempt to insert the tokens into the Supabase database
     const { data, error } = await supabase
       .from('qb_auth')
       .insert([
         {
-          access_token: authResponse.getJson().access_token,
-          refresh_token: authResponse.getJson().refresh_token,
+          access_token: access_token,
+          refresh_token: refresh_token,
         }
       ]);
 
