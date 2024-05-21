@@ -124,7 +124,8 @@ app.get('/token', async (req, res) => {
         console.log('Tokens updated successfully:', updateData);
       } catch (refreshError) {
         console.error('Error refreshing token:', refreshError.originalMessage);
-        return res.status(500).send('Internal server error during token refresh.');
+        console.error(refreshError.intuit_tid);
+        return res.redirect('/auth'); // Redirect to re-authenticate if the refresh token is also expired
       }
     }
 
