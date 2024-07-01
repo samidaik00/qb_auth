@@ -28,12 +28,13 @@ server.headersTimeout = 120 * 1000;
 
 app.get('/auth', (req, res) => {
   const authUri = oauthClient.authorizeUri({
-      scope: [
-          OAuthClient.scopes.Accounting,
-          OAuthClient.scopes.OpenId
-      ],
-      state: 'Init'
+    scope: [
+      OAuthClient.scopes.Accounting,
+      OAuthClient.scopes.OpenId
+    ],
+    state: 'Init'
   });
+
   res.redirect(authUri);
 });
 
@@ -50,24 +51,57 @@ app.get('/callback', async (req, res) => {
     // Calculate the expiration datetime
     const expires_at = new Date(Date.now() + expires_in * 1000).toISOString();
 
-    // Insert the tokens into the Supabase database
-    const { data, error } = await supabase
+    // Check if there is an existing row
+    const { data: existingData, error: existingError } = await supabase
       .from('qb_auth')
-      .insert([
-        {
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+
+    if (existingError) {
+      console.error('Error checking existing tokens:', existingError.message);
+      return res.status(400).json({ error: existingError.message });
+    }
+
+    if (existingData.length > 0) {
+      // Update the existing row
+      const { id } = existingData[0];
+      const { data: updateData, error: updateError } = await supabase
+        .from('qb_auth')
+        .update({
           access_token: access_token,
           refresh_token: refresh_token,
           expires_at: expires_at
-        }
-      ]);
+        })
+        .eq('id', id);
 
-    if (error) {
-      console.error('Error storing tokens:', error.message);
-      return res.status(400).json({ error: error.message });
+      if (updateError) {
+        console.error('Error updating tokens:', updateError.message);
+        return res.status(400).json({ error: updateError.message });
+      }
+
+      console.log('Tokens updated successfully:', updateData);
+      res.send('Authentication successful and tokens updated.');
+    } else {
+      // Insert the tokens into the Supabase database
+      const { data, error } = await supabase
+        .from('qb_auth')
+        .insert([
+          {
+            access_token: access_token,
+            refresh_token: refresh_token,
+            expires_at: expires_at
+          }
+        ]);
+
+      if (error) {
+        console.error('Error storing tokens:', error.message);
+        return res.status(400).json({ error: error.message });
+      }
+
+      console.log('Tokens stored successfully:', data);
+      res.send('Authentication successful and tokens stored.');
     }
-
-    console.log('Tokens stored successfully:', data);
-    res.send('Authentication successful and tokens stored.');
   } catch (error) {
     console.error('Error during authentication or database operation:', error.message);
     res.status(500).send('Internal server error.');
@@ -94,10 +128,14 @@ app.get('/token', async (req, res) => {
 
     let { id, access_token, refresh_token, expires_at } = data[0];
 
+    console.log('Token retrieved:', access_token);
+    console.log('Expires at:', expires_at);
+
     // Check if the token has expired
     if (new Date() >= new Date(expires_at)) {
       // Refresh the token using the refresh token
       try {
+        console.log('Refreshing token...');
         const refreshResponse = await oauthClient.refreshUsingToken(refresh_token);
         console.log('Tokens refreshed:', refreshResponse);
 
@@ -129,7 +167,9 @@ app.get('/token', async (req, res) => {
       }
     }
 
+    console.log('Returning Valid token:', access_token);
     res.json({ access_token: access_token });
+    
   } catch (error) {
     console.error('Error during token retrieval:', error.message);
     res.status(500).send('Internal server error.');
@@ -145,4 +185,4 @@ const html = `
     </section>
   </body>
 </html>
-`
+`;
