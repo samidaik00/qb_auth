@@ -65,7 +65,7 @@ const checkToken = async () => {
           return { reauth: true, message: updateError.message };
         }
 
-        return { reauth: false, access_token: access_token };
+        return { reauth: false, access_token: access_token, expires_at: expires_at };
       } catch (refreshError) {
         console.error('Error refreshing token:', refreshError.originalMessage);
         console.error(refreshError.intuit_tid);
@@ -73,7 +73,7 @@ const checkToken = async () => {
       }
     }
 
-    return { reauth: false, access_token: access_token };
+    return { reauth: false, access_token: access_token, expires_at: expires_at};
   } catch (error) {
     console.error('Error during token retrieval:', error.message);
     return { reauth: true, message: error.message };
@@ -249,5 +249,5 @@ app.get('/token', async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  res.json({ access_token: tokenStatus.access_token });
+  res.json({ access_token: tokenStatus.access_token, expires_at: tokenStatus.expires_at});
 });
