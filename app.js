@@ -142,11 +142,11 @@ app.get("/", async (req, res) => {
 </head>
 <body>
   <div class="container" id="auth-section">
+  <h1>Essntl x Quickbooks</h1>
     ${tokenStatus.reauth 
-      ? `<h1>Essntl x Quickbooks</h1>
-         <p>The session has expired. Please log in again to authorize Essntl for Quicbooks.</p>
+      ? `<p>The session has expired. Please log in again to authorize Essntl for Quicbooks.</p>
          <button onclick="window.location.href='/auth'">Log In</button>`
-      : 'Authenticating with QuickBooks Online'}
+      : 'Quicbooks session is active, you can close this window.'}
   </div>
 </body>
 </html>
