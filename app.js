@@ -246,7 +246,7 @@ app.get('/token', async (req, res) => {
   const tokenStatus = await checkToken();
 
   if (tokenStatus.reauth) {
-    return res.json({ reauth: true });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   res.json({ access_token: tokenStatus.access_token });
