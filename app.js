@@ -205,7 +205,8 @@ app.get('/callback', async (req, res) => {
         .update({
           access_token: access_token,
           refresh_token: refresh_token,
-          expires_at: expires_at
+          expires_at: expires_at,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id);
 
